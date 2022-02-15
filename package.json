@@ -1,0 +1,35 @@
+{
+  "name": "civitas",
+  "version": "0.0.1",
+  "description": "IS for NL & Captain's community",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nikita Ivanov",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.1",
+    "casual": "^1.6.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^14.2.0",
+    "express": "^4.17.2",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.14.0",
+    "helmet": "^5.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.3.3",
+    "node-cache": "^5.1.2",
+    "passport": "^0.5.2",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "passport-vkontakte": "^0.5.0",
+    "sequelize": "^6.13.0",
+    "sequelize-nested-set": "^1.6.2",
+    "validator": "^13.7.0",
+    "vk-io": "^4.4.0"
+  }
+}

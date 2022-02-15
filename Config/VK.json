@@ -1,0 +1,8 @@
+{
+  "mainAPP": {
+    "client_id": 8055716,
+    "client_secret": "r4LlhoVZxTkklA5wVuoG",
+    "redirect_uri": "http://localhost:3000/auth/login/vk",
+    "api_v": "5.131"
+  }
+}
