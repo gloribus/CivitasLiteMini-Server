@@ -12,23 +12,23 @@ module.exports = function (sequelize, Sequelize) {
 		},
 		name: {
 			type: Sequelize.STRING(255),
-			allowNull: false,
+			allowNull: true,
 		},
 		surname: {
 			type: Sequelize.STRING(255),
-			allowNull: false,
+			allowNull: true,
 		},
 		telephone: {
 			type: Sequelize.STRING(16),
-			allowNull: false,
+			allowNull: true,
 		},
 		birthday: {
 			type: Sequelize.STRING(255),
-			allowNull: false,
+			allowNull: true,
 		},
 		socialLink: {
 			type: Sequelize.STRING(255),
-			allowNull: false,
+			allowNull: true,
 		},
 		regionID: {
 			type: Sequelize.INTEGER,
