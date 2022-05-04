@@ -11,7 +11,6 @@ const bodyParser = require('body-parser');
 
 // Инициализация Helmet
 app.use(helmet());
-
 // Инициализация CORS
 app.use(
 	cors({
@@ -21,7 +20,7 @@ app.use(
 			'https://bigbusinessgame.ru',
 			'https://nastavniki.pro/',
 			'http://localhost:3000',
-			'https://adsasdasd12.tilda.ws',
+			'https://xn--b1aeda3a0j.xn--p1ai',
 		],
 	})
 );
@@ -33,19 +32,18 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-require('dotenv').config();
-
+require('dotenv').config({ path: 'Config/' + process.env.NODE_ENV + '/.env' });
 // Модели
 const models = require('./Models');
 
-// Машрутизация
+// Маршрутизация
 const authRouter = require('./Routes/auth');
 const userRouter = require('./Routes/user');
 const participantRouter = require('./Routes/participant');
 const teamRouter = require('./Routes/team');
 const logRouter = require('./Routes/log');
 const MockRouter = require('./Routes/mock');
-const handerlRouter = require('./Routes/handler');
+const handlerRouter = require('./Routes/handler');
 const publicRouter = require('./Routes/public');
 
 app.use('/auth', authRouter);
@@ -54,7 +52,7 @@ app.use('/participant', participantRouter);
 app.use('/team', teamRouter);
 app.use('/log', logRouter);
 app.use('/mock', MockRouter);
-app.use('/handler', cors({ origin: '*' }), handerlRouter);
+app.use('/handler', cors({ origin: '*' }), handlerRouter);
 app.use('/public', cors({ origin: '*' }), publicRouter);
 
 // Обработчик ошибок
@@ -78,7 +76,9 @@ app.get('/', function (req, res) {
 //models.sequelize.sync({ force: true }).then(function() {
 //models.sequelize.sync().then(function() {
 models.sequelize
-	.sync( { /* alter: true */ })
+	.sync({
+		/* alter: true */
+	})
 	.then(function () {
 		// Запуск сервера
 		app.listen(process.env.PORT, function (err) {

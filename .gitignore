@@ -1,6 +1,5 @@
 node_modules
-Config/DB.json
-Config/passport/*
+Config/production/*
 .env
 
 # misc

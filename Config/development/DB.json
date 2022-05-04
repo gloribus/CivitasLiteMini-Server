@@ -1,0 +1,7 @@
+{
+    "username": "root",
+    "password": null,
+    "database": "civitas_lite",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+}
