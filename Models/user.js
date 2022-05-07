@@ -53,9 +53,11 @@ module.exports = function (sequelize, Sequelize) {
 				'inactive',
 				'admin',
 				'frozen',
-				'coordinator'
+				'coordinator',
+				'federal',
+				'without_access'
 			),
-			defaultValue: 'active',
+			defaultValue: 'without_access',
 		},
 	});
 
