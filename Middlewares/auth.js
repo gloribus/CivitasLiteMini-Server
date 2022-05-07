@@ -41,6 +41,12 @@ module.exports = async function (req, res, next) {
 		}
 
 		const userAllowedRegions = JSON.parse(userDTO.allowedRegions);
+
+		// Закрыть доступ этим категориям к системе
+		if (['frozen', 'without_access'].includes(userDTO.status)) {
+			return next(ApiError.Forbidden());
+		}
+
 		if (
 			!['admin', 'federal'].includes(userDTO.status) &&
 			!userAllowedRegions.includes(parseInt(userDTO.regionID))
