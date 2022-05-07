@@ -8,6 +8,11 @@ module.exports = function (sequelize, Sequelize) {
 			defaultValue: Sequelize.UUIDV1,
 		},
 
+		addedBY: {
+			type: Sequelize.UUID,
+			allowNull: false,
+		},
+
 		vkID: {
 			type: Sequelize.INTEGER,
 			allowNull: true,
