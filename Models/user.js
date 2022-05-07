@@ -8,7 +8,7 @@ module.exports = function (sequelize, Sequelize) {
 			defaultValue: Sequelize.UUIDV1,
 		},
 
-		addedBY: {
+		invitedBy: {
 			type: Sequelize.UUID,
 			allowNull: false,
 		},
@@ -48,7 +48,7 @@ module.exports = function (sequelize, Sequelize) {
 		},
 
 		allowedRegions: {
-			type: Sequelize.JSON(),
+			type: Sequelize.TEXT('long'),
 			defaultValue: null,
 		},
 

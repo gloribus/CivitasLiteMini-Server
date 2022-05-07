@@ -1,11 +1,15 @@
 const Model = require('../Models').user;
-/* const ApiError = require('../Utils/api-error'); */
+const ApiError = require('../Utils/api-error');
 const allowedProperties = require('../Utils/allowed-properties');
 /* const bcrypt = require('bcrypt'); */
 
 class UserService {
 	async update(data, userID, condition) {
-		let allowedData = allowedProperties(data, ['regionID']);
+		let allowedData = allowedProperties(data, [
+			'regionID',
+			'allowedRegions',
+			'status',
+		]);
 
 		const baseCondition = { userID };
 		const finalCondition = { ...condition, ...baseCondition };
@@ -21,46 +25,51 @@ class UserService {
 		const finalCondition = { regionID };
 		const data = await Model.findAll({
 			where: finalCondition,
-			attributes: ['name', 'vkID']
+			attributes: ['name', 'vkID'],
 		});
 
 		return data;
 	}
 
-	/* 	async create(user) {
+	async create(user) {
 		let data = allowedProperties(user, [
 			'invitedBy',
-			'login',
-			'password',
-			'invitedD',
+			'vkID',
 			'name',
 			'surname',
-			'patronymic',
-			'birthday',
+			'status',
+			'regionID',
+			'allowedRegions',
 		]);
 
-		if (typeof data.password !== 'undefined') {
-			data.password = await bcrypt.hash(data.password, 10);
-		}
-
 		try {
-			const createdUser = await UserModel.create(data);
+			const createdUser = await Model.create(data);
 			return createdUser.userID;
 		} catch (e) {
-			if (typeof e?.original?.errno === 1062) {
+			if (e?.original?.errno === 1062) {
+				console.log(1234);
 				throw ApiError.BadRequest(
-					`Пользователь с таким логином ${user.login} уже существует!`
+					`Пользователь с таким vkID ${user.vkID} уже существует!`
 				);
 			} else {
 				throw ApiError.DBError(e);
 			}
 		}
-	} */
+	}
 
-	/* async getAll() {
-        const posts = await Post.find();
-        return posts;
-    }
+	async getAll(condition) {
+		const exclude = ['createdAt', 'updatedAt'];
+		const finalCondition = { ...condition };
+
+		const data = await Model.findAll({
+			where: finalCondition,
+			attributes: { exclude },
+			order: [['surname', 'DESC']],
+		});
+
+		return data;
+	}
+	/* 
     async getOne(id) {
         if (!id) {
             throw ApiError.BadRequest('Не указан ID');
