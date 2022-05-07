@@ -6,12 +6,6 @@ const authMiddleware = require('../Middlewares/auth');
 
 router.get('/all', authMiddleware, Controller.getAll);
 
-/* router.post('/', function(req, res) {
-  body('invitedBy').isLength(36),
-  authMiddleware,
-  Controller.create
-}); */
-
 router.post(
 	'/',
 	body('name').isLength({ min: 1, max: 255 }),
@@ -25,12 +19,5 @@ router.post(
 );
 
 router.put('/:id', authMiddleware, Controller.update);
-
-/* router.post('/', 
-    body('login').isLength({min: 3, max: 32}).isAlphanumeric(),
-    body('password').isLength({min: 7, max: 64}),
-    Controller.create
-);
- */
 
 module.exports = router;
