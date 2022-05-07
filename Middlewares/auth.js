@@ -40,7 +40,13 @@ module.exports = async function (req, res, next) {
 			return next(ApiError.UnauthorizedError());
 		}
 
-		const userAllowedRegions = JSON.parse(userDTO.allowedRegions);
+		let userAllowedRegions = [];
+		userAllowedRegions.push(userDTO.regionID);
+		if (userDTO.status == 'coordinator') {
+			if (userDTO.allowedRegions && userDTO.allowedRegions.length) {
+				userAllowedRegions = JSON.parse(userDTO.allowedRegions);
+			}
+		}
 
 		// Закрыть доступ этим категориям к системе
 		if (['frozen', 'without_access'].includes(userDTO.status)) {
@@ -48,7 +54,7 @@ module.exports = async function (req, res, next) {
 		}
 
 		if (
-			!['admin', 'federal'].includes(userDTO.status) &&
+			userDTO.status == 'coordinator' &&
 			!userAllowedRegions.includes(parseInt(userDTO.regionID))
 		) {
 			return next(ApiError.Forbidden());
