@@ -13,8 +13,8 @@ module.exports = class ApiError extends Error {
 		return new ApiError(401, 'Пользователь не авторизован');
 	}
 
-	static Forbidden() {
-		return new ApiError(403, 'Нет прав на данный запрос');
+	static Forbidden(errors = []) {
+		return new ApiError(403, 'Нет прав на данный запрос', errors);
 	}
 
 	static BadRequest(message, errors = []) {
