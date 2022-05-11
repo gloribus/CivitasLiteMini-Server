@@ -4,6 +4,7 @@ const router = new Router();
 const { body } = require('express-validator');
 const authMiddleware = require('../Middlewares/auth');
 
+// TODO: разделить на my и all
 router.get('/all', authMiddleware, Controller.getAll);
 
 router.post(

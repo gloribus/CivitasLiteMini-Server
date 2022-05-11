@@ -44,10 +44,9 @@ class UserService {
 
 		try {
 			const createdUser = await Model.create(data);
-			return createdUser.userID;
+			return createdUser;
 		} catch (e) {
 			if (e?.original?.errno === 1062) {
-				console.log(1234);
 				throw ApiError.BadRequest(
 					`Пользователь с таким vkID ${user.vkID} уже существует!`
 				);
