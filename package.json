@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "init": "npm i",
     "dev": "set NODE_ENV=development&&node server.js",
+    "devDB": "set DB_ENV=sync&&set NODE_ENV=development&&node server.js",
     "prod": "set NODE_ENV=production&&node server.js"
   },
   "author": "Nikita Ivanov",

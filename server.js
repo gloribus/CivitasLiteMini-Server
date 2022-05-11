@@ -39,6 +39,7 @@ const models = require('./Models');
 // Маршрутизация
 const authRouter = require('./Routes/auth');
 const userRouter = require('./Routes/user');
+const eventRouter = require('./Routes/event');
 const participantRouter = require('./Routes/participant');
 const teamRouter = require('./Routes/team');
 const logRouter = require('./Routes/log');
@@ -48,6 +49,7 @@ const publicRouter = require('./Routes/public');
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/event', eventRouter);
 app.use('/participant', participantRouter);
 app.use('/team', teamRouter);
 app.use('/log', logRouter);
@@ -75,9 +77,15 @@ app.get('/', function (req, res) {
 // Синхронизация БД
 //models.sequelize.sync({ force: true }).then(function() {
 //models.sequelize.sync().then(function() {
+
+let dbAlter = false;
+if (process.env.DB_ENV) {
+	dbAlter = true;
+}
+
 models.sequelize
 	.sync({
-		/* alter: true */
+		alter: dbAlter,
 	})
 	.then(function () {
 		// Запуск сервера
