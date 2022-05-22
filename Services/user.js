@@ -1,6 +1,7 @@
 const Model = require('../Models').user;
 const ApiError = require('../Utils/api-error');
 const allowedProperties = require('../Utils/allowed-properties');
+const { Op } = require('sequelize');
 /* const bcrypt = require('bcrypt'); */
 
 class UserService {
@@ -9,6 +10,13 @@ class UserService {
 			'regionID',
 			'allowedRegions',
 			'status',
+			'name',
+			'surname',
+			'status',
+			'isStudent',
+			'birthday',
+			'vkID',
+			'photo',
 		]);
 
 		const baseCondition = { userID };
@@ -39,6 +47,9 @@ class UserService {
 			'surname',
 			'status',
 			'regionID',
+			'isStudent',
+			'birthday',
+			'photo',
 			'allowedRegions',
 		]);
 
@@ -56,18 +67,95 @@ class UserService {
 		}
 	}
 
-	async getAll(condition) {
+	async get(
+		condition,
+		include = [],
+		order = ['surname', 'DESC'],
+		limit = 250
+	) {
 		const exclude = ['createdAt', 'updatedAt'];
 		const finalCondition = { ...condition };
 
+		let attributes;
+		if (include && include.length > 0) {
+			attributes = include;
+		} else {
+			attributes = { exclude };
+		}
+
 		const data = await Model.findAll({
 			where: finalCondition,
-			attributes: { exclude },
-			order: [['surname', 'DESC']],
+			attributes,
+			order: [order],
+			limit,
 		});
 
 		return data;
 	}
+
+	async updateStats(id, aim, value) {
+		if (!id) {
+			throw ApiError.BadRequest('Не указан ID');
+		}
+
+		if (!aim || !value) {
+			throw ApiError.BadRequest('Не указаны данные для обновления');
+		}
+
+		if (
+			![
+				'participantsCNT',
+				'ideasCNT',
+				'eventsCNT',
+				'invitedCNT',
+			].includes(aim)
+		) {
+			throw ApiError.BadRequest('Неверное значение aim');
+		}
+		const isUpdated = await Model.increment(aim, {
+			by: value,
+			where: { userID: id },
+		});
+
+		return Boolean(isUpdated[0][1]);
+	}
+
+	async getAgregation() {
+		const CNT = await Model.count({
+			attributes: ['status'],
+			group: 'status',
+			distinct: true,
+			col: 'vkID',
+		});
+
+		return CNT;
+	}
+
+	/* 	async getStats(userID) {
+		if (!userID) {
+			throw ApiError.BadRequest('Не указан ID');
+		}
+
+		const where =
+			userID != 'all' ? { userID: id } : { eventsCNT: { [Op.gt]: 0 } };
+
+		const data = await Model.findAll({
+			where,
+			attributes: [
+				'userID',
+				'name',
+				'surname',
+				'photo',
+				'ideasCNT',
+				'eventsCNT',
+				'invitedCNT',
+			],
+			order: ['participantsCNT', 'DESC'],
+		});
+
+		return data;
+	} */
+
 	/* 
     async getOne(id) {
         if (!id) {

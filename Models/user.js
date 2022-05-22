@@ -7,6 +7,13 @@ module.exports = function (sequelize, Sequelize) {
 			unique: true,
 			defaultValue: Sequelize.UUIDV1,
 		},
+		userID: {
+			type: Sequelize.UUID,
+			primaryKey: true,
+			allowNull: false,
+			unique: true,
+			defaultValue: Sequelize.UUIDV1,
+		},
 
 		invitedBy: {
 			type: Sequelize.UUID,
@@ -38,8 +45,28 @@ module.exports = function (sequelize, Sequelize) {
 			},
 		},
 
+		photo: {
+			type: Sequelize.STRING(255),
+			allowNull: true,
+		},
+
 		surname: {
 			type: Sequelize.STRING(255),
+			allowNull: true,
+			defaultValue: null,
+			validate: {
+				len: [1, 255],
+			},
+		},
+
+		isStudent: {
+			type: Sequelize.BOOLEAN,
+			allowNull: true,
+			defaultValue: null,
+		},
+
+		birthday: {
+			type: Sequelize.DATE,
 			allowNull: true,
 			defaultValue: null,
 			validate: {
@@ -63,6 +90,23 @@ module.exports = function (sequelize, Sequelize) {
 				'without_access'
 			),
 			defaultValue: 'without_access',
+		},
+
+		participantsCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
+		},
+		ideasCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
+		},
+		eventsCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
+		},
+		invitedCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
 		},
 	});
 

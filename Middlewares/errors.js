@@ -2,7 +2,12 @@ const ApiError = require('../Utils/api-error');
 
 module.exports = function (err, req, res, next) {
 	// TODO: in file
-	console.log(err);
+	if (err.status !== 401) {
+		console.log('UTC-0:', new Date());
+		console.log(err);
+		console.log(req.user || 'Пользователь не найден');
+	}
+
 	if (err instanceof ApiError) {
 		return res
 			.status(err.status)

@@ -41,6 +41,7 @@ class AuthService {
 				'regionID',
 				'name',
 				'surname',
+				'photo',
 				'allowedRegions',
 			],
 		});
@@ -52,14 +53,22 @@ class AuthService {
 		const status = user.status;
 		const regionID = user.regionID;
 		const fullName = user.name + ' ' + user.surname;
-		const allowedRegions = JSON.parse(user.allowedRegions);
+		const photo = user.photo;
+		let allowedRegions = null;
+		if (user.allowedRegions && user.allowedRegions.length > 0) {
+			try {
+				allowedRegions = JSON.parse(user.allowedRegions);
+			} catch (e) {
+				allowedRegions = null;
+			}
+		}
 
 		const tokens = tokenService.generateTokens({ userID });
 
 		await tokenService.saveToken(userID, tokens.refreshToken);
 		return {
 			token: { ...tokens },
-			user: { userID, status, regionID, fullName, allowedRegions },
+			user: { userID, status, regionID, fullName, photo, allowedRegions },
 		};
 	}
 
@@ -88,6 +97,7 @@ class AuthService {
 				'regionID',
 				'name',
 				'surname',
+				'photo',
 				'allowedRegions',
 			],
 		});
@@ -96,14 +106,22 @@ class AuthService {
 		const status = user.status;
 		const regionID = user.regionID;
 		const fullName = user.name + ' ' + user.surname;
-		const allowedRegions = JSON.parse(user.allowedRegions);
+		const photo = user.photo;
+		let allowedRegions = null;
+		if (user.allowedRegions && user.allowedRegions.length > 0) {
+			try {
+				allowedRegions = JSON.parse(user.allowedRegions);
+			} catch (e) {
+				allowedRegions = null;
+			}
+		}
 
 		const tokens = tokenService.generateTokens({ userID });
 
 		await tokenService.saveToken(userID, tokens.refreshToken);
 		return {
 			token: { ...tokens },
-			user: { userID, status, regionID, fullName, allowedRegions },
+			user: { userID, status, regionID, fullName, photo, allowedRegions },
 		};
 	}
 

@@ -3,8 +3,6 @@ const Log = require('../Utils/log');
 class LogController {
 	async log(req, res, next) {
 		try {
-			console.log(req.user);
-			console.log(req.body);
 			Log.add({
 				userID: req.user.userID,
 				action: req.body.action,

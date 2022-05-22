@@ -4,6 +4,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const app = express();
 const errorMiddleware = require('./Middlewares/errors');
+const inboxMiddleware = require('./Middlewares/inbox');
+const cron = require('node-cron');
 
 //const passport   = require('passport');
 //const session    = require('express-session');
@@ -21,7 +23,9 @@ app.use(
 			'https://nastavniki.pro/',
 			'http://localhost:3000',
 			'https://xn--b1aeda3a0j.xn--p1ai',
+			'https://civitas.space',
 		],
+		methods: ['GET', 'PUT', 'POST', 'DELETE'],
 	})
 );
 
@@ -36,11 +40,16 @@ require('dotenv').config({ path: 'Config/' + process.env.NODE_ENV + '/.env' });
 // Модели
 const models = require('./Models');
 
+// Inbox
+app.use(inboxMiddleware);
+
 // Маршрутизация
 const authRouter = require('./Routes/auth');
 const userRouter = require('./Routes/user');
 const eventRouter = require('./Routes/event');
-const participantRouter = require('./Routes/participant');
+const regionStatisticsRouter = require('./Routes/regionStatistics');
+//const participantRouter = require('./Routes/participant');
+const marafonParticipantRouter = require('./Routes/marafonParticipant');
 const teamRouter = require('./Routes/team');
 const logRouter = require('./Routes/log');
 const MockRouter = require('./Routes/mock');
@@ -50,10 +59,13 @@ const publicRouter = require('./Routes/public');
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/event', eventRouter);
-app.use('/participant', participantRouter);
+app.use('/statistics', eventRouter);
+//app.use('/participant', participantRouter);
+app.use('/participant/marafon', marafonParticipantRouter);
 app.use('/team', teamRouter);
 app.use('/log', logRouter);
 app.use('/mock', MockRouter);
+app.use('/region/statistics', regionStatisticsRouter);
 app.use('/handler', cors({ origin: '*' }), handlerRouter);
 app.use('/public', cors({ origin: '*' }), publicRouter);
 
@@ -72,6 +84,23 @@ app.use(errorMiddleware);
 
 app.get('/', function (req, res) {
 	res.send('Welcome to Civitas');
+});
+
+const cronUpdateRegionStatistics = require('./Cron/updateRegionStatistics');
+
+// Cron Job
+cron.schedule('*/10 * * * *', () => {
+	cronUpdateRegionStatistics().then(
+		function (result) {
+			if (!result) {
+				console.log('Обновления статистики регионов не выполнено!');
+			}
+		},
+		function (error) {
+			console.log('Ошибка обновления статистики регионов!');
+			console.log(error);
+		}
+	);
 });
 
 // Синхронизация БД

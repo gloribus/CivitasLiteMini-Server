@@ -1,5 +1,5 @@
 node_modules
-Config/production/*
+#Config/production/*
 .env
 
 # misc
