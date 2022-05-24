@@ -49,5 +49,12 @@ module.exports = function (sequelize, Sequelize) {
 		},
 	});
 
+	MarafonIdea.associate = (models) => {
+		MarafonIdea.belongsTo(models.event, {
+			foreignKey: 'eventID',
+			sourceKey: 'id',
+		});
+	};
+
 	return MarafonIdea;
 };

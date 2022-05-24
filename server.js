@@ -25,7 +25,7 @@ app.use(
 			'https://xn--b1aeda3a0j.xn--p1ai',
 			'https://civitas.space',
 		],
-		methods: ['GET', 'PUT', 'POST', 'DELETE'],
+		methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
 	})
 );
 
@@ -50,6 +50,7 @@ const eventRouter = require('./Routes/event');
 const regionStatisticsRouter = require('./Routes/regionStatistics');
 //const participantRouter = require('./Routes/participant');
 const marafonParticipantRouter = require('./Routes/marafonParticipant');
+const marafonIdeaRouter = require('./Routes/marafonIdea');
 const teamRouter = require('./Routes/team');
 const logRouter = require('./Routes/log');
 const MockRouter = require('./Routes/mock');
@@ -61,7 +62,8 @@ app.use('/user', userRouter);
 app.use('/event', eventRouter);
 app.use('/statistics', eventRouter);
 //app.use('/participant', participantRouter);
-app.use('/participant/marafon', marafonParticipantRouter);
+app.use('/marafon/participant', marafonParticipantRouter);
+app.use('/marafon/idea', marafonIdeaRouter);
 app.use('/team', teamRouter);
 app.use('/log', logRouter);
 app.use('/mock', MockRouter);
@@ -87,10 +89,25 @@ app.get('/', function (req, res) {
 });
 
 const cronUpdateRegionStatistics = require('./Cron/updateRegionStatistics');
+const cronUpdateUserStatistics = require('./Cron/updateUserStatistics');
 
 // Cron Job
 cron.schedule('*/10 * * * *', () => {
 	cronUpdateRegionStatistics().then(
+		function (result) {
+			if (!result) {
+				console.log('Обновления статистики регионов не выполнено!');
+			}
+		},
+		function (error) {
+			console.log('Ошибка обновления статистики регионов!');
+			console.log(error);
+		}
+	);
+});
+
+cron.schedule('* */6 * * *', () => {
+	cronUpdateUserStatistics().then(
 		function (result) {
 			if (!result) {
 				console.log('Обновления статистики регионов не выполнено!');

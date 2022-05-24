@@ -27,7 +27,6 @@ class RegionStatisticsService {
 	}
 
 	async sum(condition) {
-		console.log(condition);
 		const data = await Model.findAll({
 			where: condition,
 			attributes: [

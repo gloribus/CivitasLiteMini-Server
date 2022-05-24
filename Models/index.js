@@ -31,6 +31,10 @@ Object.keys(db).forEach(function (modelName) {
 	}
 });
 
+/* db.marafonIdea.hasOne(db.event, { foreignKey: 'id' });
+db.event.belongsTo(db.marafonIdea, { foreignKey: 'eventID' });
+ */
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

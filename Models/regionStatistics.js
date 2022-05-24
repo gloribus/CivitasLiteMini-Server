@@ -21,6 +21,14 @@ module.exports = function (sequelize, Sequelize) {
 			type: Sequelize.INTEGER,
 			defaultValue: 0,
 		},
+		activeCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
+		},
+		without_accessCNT: {
+			type: Sequelize.INTEGER,
+			defaultValue: 0,
+		},
 	});
 
 	return RegionStatistics;

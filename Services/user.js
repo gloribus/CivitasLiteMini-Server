@@ -1,7 +1,7 @@
 const Model = require('../Models').user;
 const ApiError = require('../Utils/api-error');
 const allowedProperties = require('../Utils/allowed-properties');
-const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 /* const bcrypt = require('bcrypt'); */
 
 class UserService {
@@ -88,6 +88,7 @@ class UserService {
 			attributes,
 			order: [order],
 			limit,
+			logging: false,
 		});
 
 		return data;
@@ -126,6 +127,37 @@ class UserService {
 			group: 'status',
 			distinct: true,
 			col: 'vkID',
+		});
+
+		console.log(CNT);
+		return CNT;
+	}
+
+	async getLineUp() {
+		/* 		const CNT = await Model.count({
+			attributes: ['status', 'regionID'],
+			group: 'regionID',
+		}); */
+
+		const CNT = await Model.findAll({
+			attributes: [
+				'regionID',
+				[
+					Sequelize.literal(
+						`sum(case when status = 'active' then 1 else 0 end)`
+					),
+					'active',
+				],
+				[
+					Sequelize.literal(
+						`sum(case when status = 'without_access' then 1 else 0 end)`
+					),
+					'without_access',
+				],
+			],
+			group: 'regionID',
+			raw: true,
+			logging: false,
 		});
 
 		return CNT;

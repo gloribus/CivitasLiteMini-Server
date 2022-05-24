@@ -40,5 +40,13 @@ module.exports = function (sequelize, Sequelize) {
 			defaultValue: false,
 		},
 	});
+
+	Event.associate = (models) => {
+		Event.belongsTo(models.user, {
+			foreignKey: 'userID',
+			sourceKey: 'userID',
+		});
+	};
+
 	return Event;
 };

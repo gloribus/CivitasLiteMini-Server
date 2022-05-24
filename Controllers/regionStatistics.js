@@ -2,6 +2,7 @@ const Service = require('../Services/regionStatistics');
 const MarafonParticipantService = require('../Services/marafonParticipant');
 const MarafonIdeaService = require('../Services/marafonIdea');
 const UserService = require('../Services/user');
+const ApiError = require('../Utils/api-error');
 
 /* const TeamService = require('../Services/participant'); */
 const { Op } = require('sequelize');
@@ -50,8 +51,6 @@ class RegionStatisticsController {
 						},
 					];
 
-					console.log(result);
-
 					break;
 				case 'federal':
 				case 'admin':
@@ -73,6 +72,8 @@ class RegionStatisticsController {
 						const participantsCNT = region.participantsCNT;
 						const ideasCNT = region.ideasCNT;
 						const eventsCNT = region.eventsCNT;
+						const activeCNT = region.activeCNT;
+						const without_accessCNT = region.without_accessCNT;
 						const title = region.title;
 
 						federal.participantsCNT += participantsCNT;
@@ -82,6 +83,8 @@ class RegionStatisticsController {
 							participantsCNT,
 							ideasCNT,
 							eventsCNT,
+							without_accessCNT,
+							activeCNT,
 							title,
 						};
 					});
@@ -92,6 +95,8 @@ class RegionStatisticsController {
 						let participantsCNT = 0;
 						let ideasCNT = 0;
 						let eventsCNT = 0;
+						let activeCNT = 0;
+						let without_accessCNT = 0;
 
 						const coordinatorRegions = JSON.parse(
 							coordinator.allowedRegions
@@ -102,6 +107,8 @@ class RegionStatisticsController {
 								participantsCNT += region.participantsCNT;
 								ideasCNT += region.ideasCNT;
 								eventsCNT += region.eventsCNT;
+								activeCNT += region.activeCNT;
+								without_accessCNT += region.without_accessCNT;
 							}
 						});
 
@@ -115,14 +122,25 @@ class RegionStatisticsController {
 								participantsCNT,
 								ideasCNT,
 								eventsCNT,
+								activeCNT,
+								without_accessCNT,
 							},
 						});
 					});
 					result = {
 						titles: {
-							participantsCNT: 'Участников',
-							ideasCNT: 'Идей',
-							eventsCNT: 'Мероприятий',
+							federal: {
+								participantsCNT: 'Участников',
+								ideasCNT: 'Идей',
+								eventsCNT: 'Мероприятий',
+							},
+							district: {
+								participantsCNT: 'Участников',
+								ideasCNT: 'Идей',
+								eventsCNT: 'Мероп.',
+								activeCNT: 'Наставников',
+								without_accessCNT: 'Организ.',
+							},
 						},
 						federal,
 						districts: districtStats,
@@ -138,6 +156,7 @@ class RegionStatisticsController {
 			}
 
 			//result.stats = stats;
+			/* console.log(result.districts); */
 			return res.json(result);
 		} catch (e) {
 			next(e);

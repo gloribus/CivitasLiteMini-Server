@@ -1,6 +1,7 @@
 const ParticipantService = require('../Services/participant');
 const TeamService = require('../Services/team');
 const UserService = require('../Services/user');
+const MarafonParticipantService = require('../Services/marafonParticipant');
 const Bot = require('../Utils/bot');
 const axios = require('axios');
 
@@ -60,7 +61,9 @@ class HandlerController {
 				]);
 
 				if (event.length == 0) {
-					throw ApiError.BadRequest('Код мероприятия не найден!');
+					return next(
+						ApiError.BadRequest('Код мероприятия не найден!')
+					);
 				}
 
 				data.regionID = event[0].regionID;
@@ -73,10 +76,17 @@ class HandlerController {
 
 			let response;
 
-			response = await axios.get(
-				`https://oauth.vk.com/access_token?client_id=8165820&client_secret=SQRzKBv8Aux9gQqPcIZl&redirect_uri=https://xn--80aa8agek3a.xn--b1aeda3a0j.xn--p1ai/form&code=${data.vkCode}`
-			);
-
+			try {
+				response = await axios.get(
+					`https://oauth.vk.com/access_token?client_id=8165820&client_secret=SQRzKBv8Aux9gQqPcIZl&redirect_uri=https://xn--80aa8agek3a.xn--b1aeda3a0j.xn--p1ai/form&code=${data.vkCode}`
+				);
+			} catch (err) {
+				if (err.response.status) {
+					return next(
+						ApiError.BadRequest('Ошибка ВК. Перезагрузите страницу')
+					);
+				}
+			}
 			const vkAccessToken = response.data.access_token;
 
 			response = await axios.get(
@@ -85,12 +95,38 @@ class HandlerController {
 
 			if (response.data.error) {
 				console.log(response.data);
-				throw ApiError.BadRequest('Ошибка проверки VK авторизации [1]');
+				return next(
+					ApiError.BadRequest('Ошибка проверки VK авторизации [1]')
+				);
 			}
 
 			data.vkID = response.data.response[0].id;
 			data.name = response.data.response[0].first_name;
 			data.surname = response.data.response[0].last_name;
+
+			const participantVKID = data.vkID;
+
+			// Провека уникальности и не является ли пользователем системы
+
+			const checkInUsers = await UserService.get({
+				vkID: participantVKID,
+			});
+
+			if (checkInUsers.length === 1 && data.code != 'test') {
+				return next(
+					ApiError.BadRequest(
+						'Пользователю Civitas нельзя отправлять обычные заявки! Используй код test'
+					)
+				);
+			}
+
+			const checkInParticipnats = await MarafonParticipantService.getAll({
+				vkID: participantVKID,
+			});
+
+			if (checkInParticipnats.length > 0) {
+				return next(ApiError.BadRequest('participant already exist'));
+			}
 
 			/* 			
 			const checkVKHash = require('../Utils/checkVKHash');
@@ -108,11 +144,12 @@ class HandlerController {
 			} */
 
 			// Create Participant
-			const MarafonParticipantService = require('../Services/marafonParticipant');
 			const participantID = await MarafonParticipantService.create(data);
 
 			if (!participantID) {
-				throw ApiError.BadRequest('Ошибка создания пользователя');
+				return next(
+					ApiError.BadRequest('Ошибка создания пользователя')
+				);
 			}
 
 			// Create Idea
@@ -155,8 +192,6 @@ class HandlerController {
 	}
 
 	async registration(req, res, next) {
-		console.log('---registration---');
-		console.log(req.body);
 		try {
 			const data = req.body;
 
@@ -167,7 +202,7 @@ class HandlerController {
 			);
 			const regionID =
 				parseInt(data.regionID) || parseInt(data.regionIDFromLink);
-			console.log(regionID);
+
 			if (data.formid === 'form410944671') {
 				// SEND TO VK
 				const users = await UserService.getVKIDs(regionID);
@@ -176,6 +211,10 @@ class HandlerController {
 					form410944671: {
 						title: 'БПИ',
 						action: 'Регистрация в турнире (одиночная)',
+					},
+					form412922667: {
+						title: 'ЯВделе',
+						action: 'Регистрация в программе',
 					},
 				};
 				users.map((user) => {
@@ -191,6 +230,25 @@ class HandlerController {
 					`${data.telephone}\n` +
 					`${data.universityName}\n` +
 					`${data.facultyName}`;
+
+				Bot.sendMsg(vkIDS, msg);
+			} else if (data.formid === 'form412922667') {
+				// SEND TO VK
+				const users = await UserService.getVKIDs(regionID);
+				const vkIDS = [];
+				const title = 'ЯВделе';
+				const action = 'Регистрация в программе';
+
+				users.map((user) => {
+					vkIDS.push(user.vkID);
+				});
+
+				const msg =
+					`🥳 Новая заявка с сайта ${title}\n` +
+					`${action}\n---------\n` +
+					`${data.name}\n` +
+					`${data.socialLink}\n` +
+					`${data.telephone}`;
 
 				Bot.sendMsg(vkIDS, msg);
 			} else if (data.formid === 'form410931121') {

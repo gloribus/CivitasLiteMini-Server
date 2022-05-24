@@ -220,6 +220,58 @@ class UserController {
 		}
 	}
 
+	async getByID(req, res, next) {
+		try {
+			const data = await Service.get(
+				{ userID: req.params.id },
+				['name', 'surname', 'regionID', 'photo', 'status'],
+				['userID', 'DESC'],
+				1
+			);
+
+			return res.json(data);
+		} catch (e) {
+			next(e);
+		}
+	}
+
+	async getByRegion(req, res, next) {
+		try {
+			let condition = {
+				regionID: req.params.id,
+				status: 'active',
+			};
+			let order = ['ideasCNT', 'DESC'];
+
+			const userStatus = req.user.userStatus;
+			if (userStatus == 'coordinator') {
+				if (
+					!req.user.userAllowedRegions.includes(
+						parseInt(req.params.id)
+					)
+				) {
+					return next(
+						ApiError.Forbidden(`У тебя нет доступа к этому региону`)
+					);
+				}
+			} else if (userStatus == 'active') {
+				condition = {
+					userID: req.user.userID,
+				};
+			}
+
+			const data = await Service.get(
+				condition,
+				['userID', 'name', 'surname'],
+				order
+			);
+
+			return res.json(data);
+		} catch (e) {
+			next(e);
+		}
+	}
+
 	async getStats(req, res, next) {
 		try {
 			let condition = {};
@@ -539,5 +591,27 @@ class UserController {
 			next(e);
 		}
 	} */
+
+	async actualize(req, res, next) {
+		try {
+			const cronUpdateUserStatistics = require('../Cron/updateUserStatistics');
+			cronUpdateUserStatistics().then(
+				function (result) {
+					if (!result) {
+						return console.log(
+							'Обновления статистики пользователей не выполнено!'
+						);
+					}
+				},
+				function (error) {
+					console.log('Ошибка обновления статистики пользователей!');
+					return console.log(error);
+				}
+			);
+			return res.json('success');
+		} catch (e) {
+			next(e);
+		}
+	}
 }
 module.exports = new UserController();

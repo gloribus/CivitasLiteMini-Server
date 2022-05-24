@@ -4,10 +4,12 @@ const router = new Router();
 const { body } = require('express-validator');
 const authMiddleware = require('../Middlewares/auth');
 
-// TODO: разделить на my и all
 router.get('/all', authMiddleware, Controller.getAll);
+router.get('/region/:id', authMiddleware, Controller.getByRegion);
 router.get('/stats/:id', authMiddleware, Controller.getStats);
 router.get('/agregation', authMiddleware, Controller.getAgregation);
+router.get('/:id', authMiddleware, Controller.getByID);
+router.patch('/actualize', authMiddleware, Controller.actualize);
 
 router.post(
 	'/',
