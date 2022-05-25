@@ -24,6 +24,8 @@ app.use(
 			'http://localhost:3000',
 			'https://xn--b1aeda3a0j.xn--p1ai',
 			'https://civitas.space',
+			'https://xn--80aa8agek3a.xn--b1aeda3a0j.xn--p1ai',
+			'https://marafon.xn--b1aeda3a0j.xn--p1ai',
 		],
 		methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
 	})
@@ -56,6 +58,7 @@ const logRouter = require('./Routes/log');
 const MockRouter = require('./Routes/mock');
 const handlerRouter = require('./Routes/handler');
 const publicRouter = require('./Routes/public');
+const marafonPublicRouter = require('./Routes/marafonPublic');
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
@@ -70,6 +73,7 @@ app.use('/mock', MockRouter);
 app.use('/region/statistics', regionStatisticsRouter);
 app.use('/handler', cors({ origin: '*' }), handlerRouter);
 app.use('/public', cors({ origin: '*' }), publicRouter);
+app.use('/marafon/public', marafonPublicRouter);
 
 // Обработчик ошибок
 app.use(errorMiddleware);

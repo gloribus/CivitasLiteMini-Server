@@ -45,6 +45,27 @@ class MarafonIdeaService {
 		return data;
 	}
 
+	async get(condition, include = [], limit = 9999) {
+		const exclude = ['updatedAt', 'isDeleted'];
+		const baseCondition = { isDeleted: false };
+		const finalCondition = { ...condition, ...baseCondition };
+
+		let attributes;
+		if (include && include.length > 0) {
+			attributes = include;
+		} else {
+			attributes = { exclude };
+		}
+
+		const data = await Model.findAll({
+			where: finalCondition,
+			attributes,
+			limit,
+		});
+
+		return data;
+	}
+
 	async count(condition) {
 		const CNT = await Model.count({
 			where: condition,

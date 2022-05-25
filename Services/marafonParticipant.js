@@ -26,7 +26,7 @@ class MarafonParticipantService {
 		return data;
 	}
 
-	async create(participant) {
+	async create(participant, onlyID = true) {
 		let data = allowedProperties(participant, [
 			'name',
 			'surname',
@@ -41,7 +41,11 @@ class MarafonParticipantService {
 
 		try {
 			const created = await Model.create(data);
-			return created.uuid;
+			if (onlyID) {
+				return created.uuid;
+			} else {
+				return created;
+			}
 		} catch (e) {
 			throw ApiError.DBError(e);
 		}
