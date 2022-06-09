@@ -7,11 +7,11 @@ const modelName = 'user';
 
 const { validationResult } = require('express-validator');
 
-function isAllowedNewRegion(allowedRegions, newRegion) {
+function isAllowedNewRegion (allowedRegions, newRegion) {
 	return allowedRegions.includes(parseInt(newRegion));
 }
 
-async function getVkPhoto(vkLink = '', vkID = '', next) {
+async function getVkPhoto (vkLink = '', vkID = '') {
 	if (vkLink) {
 		const splitedLink = vkLink.split('/');
 		vkID = splitedLink[splitedLink.length - 1];
@@ -27,17 +27,17 @@ async function getVkPhoto(vkLink = '', vkID = '', next) {
 	}
 
 	if (!response.data.response || response.data.response.length == 0) {
-		return next(ApiError.BadRequest(`Пользователь VK не найден`));
+		throw ApiError.BadRequest(`Пользователь VK не найден`);
 	}
 
 	if (!response.data.response[0].id) {
-		return next(ApiError.BadRequest(`Данные VK не найдены`));
+		throw ApiError.BadRequest(`Данные VK не найдены`);
 	}
 
 	return [response.data.response[0].id, response.data.response[0].photo_max];
 }
 
-function checkIsCoordinator(current, newStatus) {
+function checkIsCoordinator (current, newStatus) {
 	let isCoordinator = current;
 	if (newStatus) {
 		isCoordinator = newStatus;
@@ -45,7 +45,7 @@ function checkIsCoordinator(current, newStatus) {
 	return isCoordinator == 'coordinator';
 }
 class UserController {
-	async create(req, res, next) {
+	async create (req, res, next) {
 		try {
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
@@ -132,9 +132,12 @@ class UserController {
 
 			const vkPhoto = await getVkPhoto(
 				req.body.vkLink || '',
-				req.body.vkID || '',
-				next
+				req.body.vkID || ''
 			);
+
+			if (!vkPhoto[1]) {
+				return next(ApiError.BadRequest(`Пользователь VK не найден`));
+			}
 
 			req.body.vkID = vkPhoto[0];
 			req.body.photo = vkPhoto[1];
@@ -192,7 +195,7 @@ class UserController {
 		}
 	}
 
-	async getAll(req, res, next) {
+	async getAll (req, res, next) {
 		try {
 			let condition = {};
 			let order = ['surname', 'DESC'];
@@ -220,7 +223,7 @@ class UserController {
 		}
 	}
 
-	async getByID(req, res, next) {
+	async getByID (req, res, next) {
 		try {
 			const data = await Service.get(
 				{ userID: req.params.id },
@@ -235,7 +238,7 @@ class UserController {
 		}
 	}
 
-	async getByRegion(req, res, next) {
+	async getByRegion (req, res, next) {
 		try {
 			let condition = {
 				regionID: req.params.id,
@@ -272,7 +275,7 @@ class UserController {
 		}
 	}
 
-	async getStats(req, res, next) {
+	async getStats (req, res, next) {
 		try {
 			let condition = {};
 			let include = [
@@ -286,19 +289,28 @@ class UserController {
 				'photo',
 			];
 
-			const limit = req.params.limit || 50;
+			let limit = req.params.limit || 50;
+
 			if (req.params.id == 'my') {
 				condition = {
 					userID: req.user.userID,
 				};
 			} else if (req.params.id == 'all') {
-				condition = {
-					status: 'active',
-					[Op.or]: [
-						{ eventsCNT: { [Op.gt]: 0 } },
-						{ invitedCNT: { [Op.gt]: 0 } },
-					],
-				};
+				if (['admin', 'federal'].includes(req.user.userStatus)) {
+					limit = 999;
+					condition = {
+						status: 'active'
+					};
+				} else {
+					condition = {
+						status: 'active',
+						[Op.or]: [
+							{ eventsCNT: { [Op.gt]: 0 } },
+							{ invitedCNT: { [Op.gt]: 0 } },
+						],
+					};
+				}
+
 			} else {
 				condition = {
 					userID: req.params.id,
@@ -330,7 +342,10 @@ class UserController {
 						value: user.eventsCNT,
 					},
 					{
-						title: 'Приглашено',
+						title:
+							req.params.id === 'all'
+								? 'Организаторов'
+								: 'Приглашено',
 						value: user.invitedCNT,
 					},
 				];
@@ -349,14 +364,14 @@ class UserController {
 	}
 
 	/*
-  async getOne(req, res, next) {
-      try {
-          const post = await PostService.getOne(req.params.id)
-          return res.json(post)
-      } catch (e) {
-          next(e);
-      }
-  }
+	async getOne(req, res, next) {
+			try {
+					const post = await PostService.getOne(req.params.id)
+					return res.json(post)
+			} catch (e) {
+					next(e);
+			}
+	}
  */
 
 	/* 	return next(
@@ -365,7 +380,7 @@ class UserController {
 		)
 	); */
 
-	async update(req, res, next) {
+	async update (req, res, next) {
 		try {
 			if (!req.body || req.body.length < 0) {
 				return next(
@@ -451,9 +466,9 @@ class UserController {
 			if (req.body.regionID) {
 				canEdit = Boolean(
 					canEdit *
-						req.user.userAllowedRegions.includes(
-							parseInt(req.body.regionID)
-						)
+					req.user.userAllowedRegions.includes(
+						parseInt(req.body.regionID)
+					)
 				);
 			}
 
@@ -466,10 +481,10 @@ class UserController {
 					if (!canChangeAllowedRegions) {
 						canEdit = Boolean(
 							canEdit *
-								isAllowedNewRegion(
-									req.user.userAllowedRegions,
-									req.body.regionID
-								)
+							isAllowedNewRegion(
+								req.user.userAllowedRegions,
+								req.body.regionID
+							)
 						);
 					} else {
 						canEdit = true;
@@ -523,7 +538,13 @@ class UserController {
 			}
 
 			if (req.body.vkLink) {
-				const vkPhoto = await getVkPhoto(req.body.vkLink, '', next);
+				const vkPhoto = await getVkPhoto(req.body.vkLink, '');
+				if (!vkPhoto[1]) {
+					return next(
+						ApiError.BadRequest(`Пользователь VK не найден`)
+					);
+				}
+
 				req.body.vkID = vkPhoto[0];
 				req.body.photo = vkPhoto[1];
 			}
@@ -572,7 +593,7 @@ class UserController {
 		}
 	}
 
-	async getAgregation(req, res, next) {
+	async getAgregation (req, res, next) {
 		try {
 			const data = await Service.getAgregation();
 			return res.json(data);
@@ -592,7 +613,7 @@ class UserController {
 		}
 	} */
 
-	async actualize(req, res, next) {
+	async actualize (req, res, next) {
 		try {
 			const cronUpdateUserStatistics = require('../Cron/updateUserStatistics');
 			cronUpdateUserStatistics().then(

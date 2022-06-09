@@ -48,6 +48,15 @@ module.exports = function (sequelize, Sequelize) {
 			type: Sequelize.STRING(255),
 			allowNull: true,
 		},
+		serviceNote: {
+			type: Sequelize.STRING(255),
+			allowNull: true,
+			defaultValue: null,
+		},
+		isAllowedMsgVK: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: false,
+		},
 		isDeleted: {
 			type: Sequelize.BOOLEAN,
 			defaultValue: false,

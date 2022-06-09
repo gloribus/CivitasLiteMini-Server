@@ -29,6 +29,11 @@ module.exports = function (sequelize, Sequelize) {
 			newValue: {
 				type: Sequelize.JSON,
 			},
+			serviceNote: {
+				type: Sequelize.STRING(255),
+				allowNull: true,
+				defaultValue: null,
+			},
 		},
 		{
 			updatedAt: false,

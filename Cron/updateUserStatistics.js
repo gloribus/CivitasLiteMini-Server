@@ -10,14 +10,14 @@ const MarafonIdeaModel = require('../Models').marafonIdea;
 const EventModel = require('../Models').event;
 const { Op } = require('sequelize');
 
-async function update() {
+async function update () {
 	try {
 		// Обнулить статистику в events и users
 
 		const newStats = {};
 
 		await UserModel.update(
-			{ participantsCNT: 0, ideasCNT: 0 /* eventsCNT: 0 */ },
+			{ participantsCNT: 0, ideasCNT: 0, invitedCNT: 0 /* eventsCNT: 0 */ },
 			{
 				where: { userID: { [Op.not]: null } },
 				logging: false,
@@ -119,6 +119,20 @@ async function update() {
 				}
 			}
 		}
+
+
+		const invitedCNT = await UserModel.count({
+			attributes: ['invitedBy'],
+			group: 'invitedBy',
+			logging: false,
+		});
+
+		invitedCNT.map((item) => {
+			if (data[item.invitedBy] === undefined) {
+				data[item.invitedBy] = {};
+			}
+			data[item.invitedBy].invitedCNT = item.count
+		});
 
 		for (let [userID, value] of Object.entries(data)) {
 			await UserModel.update(value, {

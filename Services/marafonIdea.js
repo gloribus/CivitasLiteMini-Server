@@ -9,7 +9,7 @@ const NodeCache = require('node-cache');
 /* const cache = new NodeCache(); */
 
 class MarafonIdeaService {
-	async getAll(condition, include = [], limit = 250, offset = 0) {
+	async getAll (condition, include = [], limit = 250, offset = 0) {
 		const exclude = ['updatedAt', 'isDeleted'];
 		const baseCondition = { isDeleted: false };
 		const finalCondition = { ...condition, ...baseCondition };
@@ -45,7 +45,7 @@ class MarafonIdeaService {
 		return data;
 	}
 
-	async get(condition, include = [], limit = 9999) {
+	async get (condition, include = [], limit = 9999) {
 		const exclude = ['updatedAt', 'isDeleted'];
 		const baseCondition = { isDeleted: false };
 		const finalCondition = { ...condition, ...baseCondition };
@@ -66,14 +66,14 @@ class MarafonIdeaService {
 		return data;
 	}
 
-	async count(condition) {
+	async count (condition) {
 		const CNT = await Model.count({
 			where: condition,
 		});
 		return CNT;
 	}
 
-	async create(participant) {
+	async create (participant) {
 		let data = allowedProperties(participant, [
 			'title',
 			'description',
@@ -84,6 +84,7 @@ class MarafonIdeaService {
 			'regionID',
 			'steps',
 			'eventID',
+			'serviceNote',
 		]);
 
 		try {
@@ -94,7 +95,7 @@ class MarafonIdeaService {
 		}
 	}
 
-	async delete(id) {
+	async delete (id) {
 		if (!id) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
@@ -109,12 +110,12 @@ class MarafonIdeaService {
 		return isDeleted;
 	}
 
-	async update(data, uuid, condition) {
+	async update (data, uuid, condition) {
 		if (!uuid) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
 
-		let allowedData = allowedProperties(data, ['ideaID']);
+		let allowedData = allowedProperties(data, ['ideaID', 'isLiked']);
 
 		const baseCondition = { uuid };
 		const finalCondition = { ...condition, ...baseCondition };
@@ -125,7 +126,7 @@ class MarafonIdeaService {
 		return isUpdated;
 	}
 
-	async abort(id) {
+	async abort (id) {
 		if (!id) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
@@ -137,7 +138,7 @@ class MarafonIdeaService {
 		return isDeleted;
 	}
 
-	async getStats() {
+	async getStats () {
 		const CNT = await Model.count({
 			attributes: ['regionID'],
 			group: 'regionID',

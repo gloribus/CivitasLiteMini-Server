@@ -6,7 +6,7 @@ const NodeCache = require('node-cache');
 /* const cache = new NodeCache(); */
 
 class MarafonParticipantService {
-	async getAll(condition, include = []) {
+	async getAll (condition, include = []) {
 		const exclude = ['createdAt', 'updatedAt', 'isDeleted'];
 		const baseCondition = { isDeleted: false };
 		const finalCondition = { ...condition, ...baseCondition };
@@ -26,7 +26,7 @@ class MarafonParticipantService {
 		return data;
 	}
 
-	async create(participant, onlyID = true) {
+	async create (participant, onlyID = true) {
 		let data = allowedProperties(participant, [
 			'name',
 			'surname',
@@ -37,6 +37,7 @@ class MarafonParticipantService {
 			'school',
 			'grade',
 			'eventID',
+			'serviceNote',
 		]);
 
 		try {
@@ -51,7 +52,7 @@ class MarafonParticipantService {
 		}
 	}
 
-	async delete(id) {
+	async delete (id) {
 		if (!id) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
@@ -66,15 +67,17 @@ class MarafonParticipantService {
 		return isDeleted;
 	}
 
-	async update(data, uuid, condition) {
+	async update (data, uuid, condition) {
 		if (!uuid) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
 
-		let allowedData = allowedProperties(data, ['ideaID']);
+		let allowedData = allowedProperties(data, ['ideaID', 'name', 'surname']);
 
 		const baseCondition = { uuid };
 		const finalCondition = { ...condition, ...baseCondition };
+		console.log(finalCondition);
+
 		const isUpdated = await Model.update(allowedData, {
 			where: finalCondition,
 		});
@@ -82,7 +85,16 @@ class MarafonParticipantService {
 		return isUpdated;
 	}
 
-	async abort(id) {
+	async updateCustom (data, where, logging = true) {
+		const isUpdated = await Model.update(data, {
+			where,
+			logging: logging,
+		});
+
+		return isUpdated;
+	}
+
+	async abort (id) {
 		if (!id) {
 			throw ApiError.BadRequest('Не указан ID');
 		}
@@ -94,7 +106,7 @@ class MarafonParticipantService {
 		return isDeleted;
 	}
 
-	async getStats() {
+	async getStats () {
 		const CNT = await Model.count({
 			attributes: ['regionID'],
 			group: 'regionID',

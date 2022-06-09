@@ -6,6 +6,7 @@ const authMiddleware = require('../Middlewares/auth');
 router.get('/all', authMiddleware, Controller.get);
 router.get('/count', authMiddleware, Controller.count);
 router.get('/:id', authMiddleware, Controller.getById);
+router.put('/liked/:id', authMiddleware, Controller.changeLike);
 /* router.get('/stats', authMiddleware, Controller.getRegionStats);
 router.get('/stats/all', Controller.getAllStats); */
 module.exports = router;

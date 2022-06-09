@@ -13,10 +13,10 @@ router.patch('/actualize', authMiddleware, Controller.actualize);
 
 router.post(
 	'/',
-	body('name').isLength({ min: 1, max: 255 }),
+	body('name').trim().isLength({ min: 1, max: 255 }),
 	body('status').isLength({ min: 1, max: 255 }),
-	body('surname').isLength({ min: 1, max: 255 }),
-	body('birthday').toDate(),
+	body('surname').trim().isLength({ min: 1, max: 255 }),
+	body('birthday').isISO8601().toDate(),
 	body('regionID').isInt({ min: 0, max: 150 }),
 	body('allowedRegions').optional(),
 	body('status').optional(),

@@ -94,6 +94,7 @@ app.get('/', function (req, res) {
 
 const cronUpdateRegionStatistics = require('./Cron/updateRegionStatistics');
 const cronUpdateUserStatistics = require('./Cron/updateUserStatistics');
+const cronCollectMailingList = require('./Cron/collectMailingList');
 
 // Cron Job
 cron.schedule('*/10 * * * *', () => {
@@ -123,6 +124,27 @@ cron.schedule('* */6 * * *', () => {
 		}
 	);
 });
+
+cron.schedule('* */12 * * *', () => {
+	cronCollectMailingList().then(
+		function (result) {
+			if (!result) {
+				console.log('Обновления ВК рассылки не выполенено!');
+			}
+		},
+		function (error) {
+			console.log('Ошибка обновления ВК рассылки не выполенено!');
+			console.log(error);
+		}
+	);
+});
+
+// Запуск ботов
+
+const marafonDiplomaBot = require('./Bot/marafon/diploma');
+marafonDiplomaBot();
+
+
 
 // Синхронизация БД
 //models.sequelize.sync({ force: true }).then(function() {

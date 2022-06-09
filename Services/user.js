@@ -29,10 +29,9 @@ class UserService {
 		return isUpdated;
 	}
 
-	async getVKIDs(regionID) {
-		const finalCondition = { regionID };
+	async getVKIDs(condition) {
 		const data = await Model.findAll({
-			where: finalCondition,
+			where: condition,
 			attributes: ['name', 'vkID'],
 		});
 

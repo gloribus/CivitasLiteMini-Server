@@ -5,32 +5,35 @@ const MarafonParticipantService = require('../Services/marafonParticipant');
 const MarafonIdeaService = require('../Services/marafonIdea');
 const EventService = require('../Services/event');
 const { Op } = require('sequelize');
+const { default: didyoumean3 } = require('didyoumean3');
+const didYouMean = require('didyoumean2').default;
 
 const ApiError = require('../Utils/api-error');
 const axios = require('axios');
 
-async function getVKID(vkAccessToken) {
+async function getVKID (vkAccessToken) {
 	response = await axios.get(
 		`https://api.vk.com/method/users.get?access_token=${vkAccessToken}&v=5.131`
 	);
 
 	if (response.data.error) {
 		console.log(response.data);
-		return next(ApiError.BadRequest('Ошибка проверки VK авторизации [1]'));
+		return { status: 'error', data: 'Ошибка проверки VK авторизации [1]' };
 	}
 
 	if (!response.data?.response[0]) {
 		console.log(response.data);
-		return next(
-			ApiError.BadRequest('Ошибка проверки VK авторизации [1.1]')
-		);
+		return {
+			status: 'error',
+			data: 'Ошибка проверки VK авторизации [1.1]',
+		};
 	}
 
-	return response.data.response[0];
+	return { status: 'success', data: response.data.response[0] };
 }
 
 class MarafonPublicController {
-	async authVK(req, res, next) {
+	async authVK (req, res, next) {
 		try {
 			let vkCode = null;
 			let vkAccessToken = null;
@@ -63,7 +66,11 @@ class MarafonPublicController {
 
 			let participantVKID;
 			if (vkAccessToken) {
-				const VK = await getVKID(vkAccessToken);
+				const VKAnswer = await getVKID(vkAccessToken);
+				const VK = VKAnswer.data;
+				if (VKAnswer.status === 'error') {
+					return next(ApiError.BadRequest(VK));
+				}
 				data.vkID = VK.id;
 				data.name = VK.first_name;
 				data.surname = VK.last_name;
@@ -115,13 +122,17 @@ class MarafonPublicController {
 		}
 	}
 
-	async createParticipant(req, res, next) {
+	async createParticipant (req, res, next) {
 		try {
 			const data = req.body;
 
 			let participantVKID;
 			if (data.vkAccessToken) {
-				const VK = await getVKID(data.vkAccessToken);
+				const VKAnswer = await getVKID(data.vkAccessToken);
+				const VK = VKAnswer.data;
+				if (VKAnswer.status === 'error') {
+					return next(ApiError.BadRequest(VK));
+				}
 				data.vkID = VK.id;
 				data.name = VK.first_name;
 				data.surname = VK.last_name;
@@ -213,12 +224,16 @@ class MarafonPublicController {
 		}
 	}
 
-	async createIdea(req, res, next) {
+	async createIdea (req, res, next) {
 		try {
 			const data = req.body;
 
 			if (data.vkAccessToken) {
-				const VK = await getVKID(data.vkAccessToken);
+				const VKAnswer = await getVKID(data.vkAccessToken);
+				const VK = VKAnswer.data;
+				if (VKAnswer.status === 'error') {
+					return next(ApiError.BadRequest(VK));
+				}
 				data.vkID = VK.id;
 			} else {
 				return next(
@@ -263,6 +278,70 @@ class MarafonPublicController {
 				return res.json({ ideaID });
 			} else {
 				return next(ApiError.BadRequest('Не переданы данные идеи'));
+			}
+		} catch (e) {
+			next(e);
+		}
+	}
+
+	async manualAdd (req, res, next) {
+		try {
+			const add = require('../Utils/manualAdd/add');
+			add(req).then(
+				function (result) {
+					if (!result) {
+						console.log('Загрузка участников не выполнена!');
+						return next(
+							ApiError.BadRequest(
+								'Загрузка участников не выполнена!'
+							)
+						);
+					}
+				},
+				function (error) {
+					console.log('Ошибка загрузки участников!');
+					console.log(error);
+					return next(
+						ApiError.BadRequest('Ошибка загрузки участников!')
+					);
+				}
+			);
+			return res.json('success');
+		} catch (e) {
+			next(e);
+		}
+	}
+
+	async predictEventID (req, res, next) {
+		try {
+			const { regionID, locality } = req.query;
+			if (regionID && locality) {
+				const events = await EventService.get({ regionID: regionID }, [
+					'locality',
+					'school',
+					'id',
+				]);
+
+				const localityArray = [];
+
+				events.map((event) => {
+					event = event.dataValues;
+					localityArray.push(event.locality);
+				});
+
+				const predict = didYouMean(locality, localityArray);
+
+				const eventsPredicted = [];
+				if (predict) {
+					events.map((event) => {
+						event = event.dataValues;
+						if (event.locality === predict) {
+							eventsPredicted.push(event);
+						}
+					});
+				}
+
+				return res.json(eventsPredicted);
 			}
 		} catch (e) {
 			next(e);

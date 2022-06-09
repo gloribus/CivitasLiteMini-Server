@@ -205,7 +205,10 @@ class HandlerController {
 
 			if (data.formid === 'form410944671') {
 				// SEND TO VK
-				const users = await UserService.getVKIDs(regionID);
+				const users = await UserService.getVKIDs({
+					regionID,
+					status: 'active',
+				});
 				const vkIDS = [];
 				const fromList = {
 					form410944671: {
@@ -234,7 +237,10 @@ class HandlerController {
 				Bot.sendMsg(vkIDS, msg);
 			} else if (data.formid === 'form412922667') {
 				// SEND TO VK
-				const users = await UserService.getVKIDs(regionID);
+				const users = await UserService.getVKIDs({
+					regionID,
+					status: 'active',
+				});
 				const vkIDS = [];
 				const title = 'ЯВделе';
 				const action = 'Регистрация в программе';
@@ -248,7 +254,8 @@ class HandlerController {
 					`${action}\n---------\n` +
 					`${data.name}\n` +
 					`${data.socialLink}\n` +
-					`${data.telephone}`;
+					`${data.telephone}\n` +
+					`📣 Это не заявка с Марафона идей, это регистрация в программе «Я в деле» (основной сайт)`;
 
 				Bot.sendMsg(vkIDS, msg);
 			} else if (data.formid === 'form410931121') {
