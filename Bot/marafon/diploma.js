@@ -15,7 +15,7 @@ const { QuestionManager } = require('vk-io-question');
 async function marafonDiplomaBot () {
 
   const api = new API({
-    token: "64519ec026f3bdd627b8d398d24921bb40a8bafe4e47074584a71b7b77d36d967ab0c27acfc95a127f5d3"
+    token: "vk1.a.CaR81mKkl6WCRmzFdDOh_KsU77eHiRnNvJtD8ROVm6NkerFAQPjlU-eUZ9yeHwNCaD2gF4NDPgYJyCNmkFdvESDGOC16oGeo8U3YCYXPOxQ6FFR1_L_aw5px57Iwa93ICD5h1StamVzYCsFMrSkyWBKctFAASVBYAjvzmVM2BmcokUI0CSfcmRH2e0WsPUE3"
   });
 
   const upload = new Upload({
@@ -29,7 +29,8 @@ async function marafonDiplomaBot () {
 
   async function sendDiploma (context, user, vkID) {
     const fullName = `${user.name} ${user.surname}`.toUpperCase();
-
+    await context.send(`${user.name}, звоню главному, чтобы тебе первому выписали диплом`);
+    await context.send({ sticker_id: 10037 });
     const pdfDoc = await PDFDocument.load(fs.readFileSync(path.join(__dirname, 'src/template.pdf'), null).buffer)
     pdfDoc.registerFontkit(fontKit);
     const customFont = await pdfDoc.embedFont(fs.readFileSync(path.join(__dirname, 'src/avenirnextcyr-bold.otf')));
@@ -65,6 +66,8 @@ async function marafonDiplomaBot () {
         action = true;
       }
     })
+
+    await context.send({ sticker_id: 10027 });
 
     if (action) {
       const userDB = await MarafonParticipantService.getAll({ vkID }, ['name', 'surname', 'uuid']);
