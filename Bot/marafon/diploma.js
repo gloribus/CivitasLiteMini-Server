@@ -48,6 +48,14 @@ async function marafonDiplomaBot () {
     await context.send({ sticker_id: 10031 });
 
     await context.send('Подпишись на это сообщество, чтобы не пропустить много классных мероприятий 😊');
+
+    await Log.add({
+      userID: vkID,
+      action: 'create',
+      aimModel: 'marafonDiploma',
+    });
+
+    return true;
   }
 
   const questionManager = new QuestionManager();
