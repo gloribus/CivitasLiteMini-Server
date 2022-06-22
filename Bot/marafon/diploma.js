@@ -29,7 +29,7 @@ async function marafonDiplomaBot () {
 
   async function sendDiploma (context, user, vkID) {
     const fullName = `${user.name} ${user.surname}`.toUpperCase();
-    await context.send(`${user.name}, звоню главному, чтобы тебе первому выписали диплом`);
+    await context.send(`${user.name}, отправили твой диплом в разработку. Как будет готов, поделимся тут`);
     await context.send({ sticker_id: 10037 });
     const pdfDoc = await PDFDocument.load(fs.readFileSync(path.join(__dirname, 'src/template.pdf'), null).buffer)
     pdfDoc.registerFontkit(fontKit);
@@ -43,11 +43,11 @@ async function marafonDiplomaBot () {
     const diplomaPDF = Buffer.from(diplomaPDFArray8);
     const diplomaPNG = await pdfToPng(diplomaPDF, { outputFileMask: 'buffer', viewportScale: 2.0 });
 
-    await context.sendPhotos({ value: diplomaPNG[0].content }, { message: 'Спасибо за участие в Марафоне идей! Держи свой диплом' });
-    await context.sendDocuments({ value: diplomaPDF, filename: 'YaVDele_diplom.pdf', contentType: 'application/pdf' }, { message: 'Это в формате PDF, его можно распечатать' });
+    await context.sendPhotos({ value: diplomaPNG[0].content }, { message: 'Благодарим за участие в Марафоне идей! Держи свой диплом' });
+    await context.sendDocuments({ value: diplomaPDF, filename: 'YaVDele_diplom.pdf', contentType: 'application/pdf' }, { message: 'А это твой диплом в pdf формате – чтобы было удобно распечатать' });
     await context.send({ sticker_id: 10031 });
 
-    await context.send('Подпишись на это сообщество, чтобы не пропустить много классных мероприятий 😊');
+    await context.send('Будем рады видеть тебя на наших других мероприятиях. Подписывайся на группу, чтобы не пропустить анонсы ✌🏻');
 
     await Log.add({
       userID: vkID,
@@ -75,18 +75,18 @@ async function marafonDiplomaBot () {
       }
     })
 
-    await context.send({ sticker_id: 10027 });
-
     if (action) {
+      await context.send({ sticker_id: 10027 });
+
       const userDB = await MarafonParticipantService.getAll({ vkID }, ['name', 'surname', 'uuid']);
       if (userDB.length < 1) {
-        await context.send('Мы не можем найти тебя в участниках Марафона идей');
+        await context.send('Хмм. Не можем найти тебя среди участников Марафона идей :(');
         return;
       }
       const user = userDB[0].dataValues;
 
       const answer = await context.question(
-        `Тебя зовут ${user.name} ${user.surname}? Правильно?`
+        `Тебя зовут ${user.name} ${user.surname}, верно?`
       );
 
       if (/да|правильно|верно|точно|yes|так и есть|lf/i.test(answer.text)) {
